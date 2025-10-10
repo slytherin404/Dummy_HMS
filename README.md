@@ -70,3 +70,15 @@ Task to mentees --> 7th Oct 2025
 55. Create a route for searching the doctor and patient by name --> to render the HTML page with searched details.
 56. Once done, commit all the changes done till now.
 57. After cross reviewing your task with me, then only you will push your codes on github repository.
+
+Task to mentees --> 10th Oct 2025
+
+58. Search functionality is done using SQLAlchemy filter function --> search route made, done by admin, to search doctors and patients by name.
+59. Search route mentioned inside admin_dashboard.html page as well.
+60. Show all the departments created by admin --> inside Patient dashboard using jinja2.
+61. Each department should have a button --> to view all the doctors present in that department --> inside Patient dashboard.
+62. Create a route --> to show all the doctors present in that department --> inside Patient dashboard.
+63. Give the route link inside patient_dashboard.html page as well.
+64. Search bar on Patient dashboard --> to search the doctor by name.
+65. Create a route for searching the doctor by name --> shown on patient dashboard..
+66. Doctor table should have a column of "Available" and "Not Available" --> to show the availability status of the doctor.
