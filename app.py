@@ -14,10 +14,10 @@ def create_admin():
         db.create_all()  # Create tables if they don't exist
         admin = Admin.query.filter_by(username='aditik123').first()
         if not admin:
-            admin = Admin(username='aditik123', email='aditi16@gmail.com', contact='1234567890', password='admin123')
+            hashed_password = generate_password_hash('admin123', method='pbkdf2:sha256')
+            admin = Admin(username='aditik123', email='aditi16@gmail.com', contact='1234567890', password=hashed_password)
             db.session.add(admin)
             db.session.commit()
-
 
 @app.route('/')
 def home():
@@ -73,6 +73,11 @@ def login():
         # Check password and login
         if user:
             if check_password_hash(user.password, password):
+                # Check if seller is blocked
+                if role == 'seller' and user.status == 'blocked':
+                    flash("Your account has been blocked by admin. Please contact support.", "danger")
+                    return redirect(url_for('login'))
+                
                 session['user_id'] = user.id
                 session['role'] = role
                 flash(f"Logged in as {role}", "success")
@@ -125,13 +130,25 @@ def edit_seller(seller_id):
         return redirect(url_for('admin_dashboard'))
     return render_template('edit_seller.html', seller=seller)
 
-@app.route('/delete_seller/<int:seller_id>', methods=['GET', 'POST'])
+@app.route('/delete_seller/<int:seller_id>', methods=['POST'])
 def delete_seller(seller_id):
     seller = Seller.query.get_or_404(seller_id)
-    if request.method == 'POST':
-        db.session.delete(seller)
-        db.session.commit()
-        flash("Seller deleted successfully!", "success")
+    db.session.delete(seller)
+    db.session.commit()
+    flash("Seller deleted successfully!", "success")
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/toggle_seller_status/<int:seller_id>', methods=['POST'])
+def toggle_seller_status(seller_id):
+    seller = Seller.query.get_or_404(seller_id)
+    if seller.status == 'active':
+        seller.status = 'blocked'
+        flash(f"Seller {seller.username} has been blocked!", "warning")
+    else:
+        seller.status = 'active'
+        flash(f"Seller {seller.username} has been unblocked!", "success")
+    
+    db.session.commit()
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/seller_dashboard')
