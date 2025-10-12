@@ -1,12 +1,24 @@
 from flask import Flask, render_template, redirect, request, url_for, session, flash
 from models import db, Admin, Customer, Seller, Storage
 from werkzeug.security import generate_password_hash, check_password_hash
+
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'Aditi123@#'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///aditi.db'
 
 db.init_app(app)
+
+# Custom Jinja2 filter for JSON parsing
+@app.template_filter('from_json')
+def from_json_filter(value):
+    if value:
+        import json
+        try:
+            return json.loads(value)
+        except (json.JSONDecodeError, TypeError):
+            return []
+    return []
 
 #predefing admin credentials
 def create_admin():
@@ -93,7 +105,42 @@ def login():
 @app.route('/admin_dashboard')
 def admin_dashboard():
     sellers = Seller.query.all()
-    return render_template('admin_dashboard.html', sellers=sellers)
+    customers = Customer.query.all()
+    return render_template('admin_dashboard.html', sellers=sellers, customers=customers)
+
+@app.route('/admin_search', methods=['GET', 'POST'])
+def admin_search():
+    if request.method == 'POST':
+        search_query = request.form['search_query'].strip()
+        search_type = request.form['search_type']
+        
+        results = {'sellers': [], 'customers': []}
+        
+        if search_query:
+            if search_type in ['all', 'sellers']:
+                # Search sellers by username
+                sellers = Seller.query.filter(
+                    Seller.username.contains(search_query)
+                ).all()
+                results['sellers'] = sellers
+            
+            if search_type in ['all', 'customers']:
+                # Search customers by username
+                customers = Customer.query.filter(
+                    Customer.username.contains(search_query)
+                ).all()
+                results['customers'] = customers
+        
+        return render_template('admin_dashboard.html', 
+                             sellers=Seller.query.all() if search_type == 'all' else results['sellers'],
+                             customers=Customer.query.all() if search_type == 'all' else results['customers'],
+                             search_performed=True,
+                             search_query=search_query,
+                             search_type=search_type,
+                             search_results=results)
+    
+    # If GET request, redirect to admin dashboard
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/create_seller', methods=['GET', 'POST'])
 def create_seller():
@@ -153,7 +200,57 @@ def toggle_seller_status(seller_id):
 
 @app.route('/seller_dashboard')
 def seller_dashboard():
-    return render_template('seller_dashboard.html')
+    if 'user_id' not in session or session.get('role') != 'seller':
+        flash("Please login as seller to access this page.", "danger")
+        return redirect(url_for('login'))
+    
+    seller = Seller.query.get(session['user_id'])
+    if not seller:
+        flash("Seller not found.", "danger")
+        return redirect(url_for('login'))
+    
+    return render_template('seller_dashboard.html', seller=seller)
+
+@app.route('/update_availability', methods=['GET', 'POST'])
+def update_availability():
+    if 'user_id' not in session or session.get('role') != 'seller':
+        flash("Please login as seller to access this page.", "danger")
+        return redirect(url_for('login'))
+    
+    seller = Seller.query.get(session['user_id'])
+    if not seller:
+        flash("Seller not found.", "danger")
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        import json
+        from datetime import datetime, timedelta
+        
+        # Get selected dates from form
+        selected_dates = request.form.getlist('available_dates')
+        
+        # Validate that all selected dates are within the next 7 days
+        today = datetime.now().date()
+        valid_dates = []
+        
+        for date_str in selected_dates:
+            try:
+                date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+                # Check if date is within next 7 days
+                if today <= date_obj <= today + timedelta(days=6):
+                    valid_dates.append(date_str)
+            except ValueError:
+                continue
+        
+        # Store the valid dates as JSON in the database
+        seller.open_dates = json.dumps(valid_dates) if valid_dates else None
+        db.session.commit()
+        
+        flash(f"Availability updated successfully! You are available on {len(valid_dates)} days.", "success")
+        return redirect(url_for('seller_dashboard'))
+    
+    # For GET request, render the availability form
+    return render_template('update_availability.html', seller=seller)
 
 @app.route('/customer_dashboard')
 def customer_dashboard():

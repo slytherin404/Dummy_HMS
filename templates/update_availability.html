@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Update Availability{% endblock %}
+
+{% block content %}
+<h2>Update Your Availability</h2>
+<p>Select the days you will be available for the next 7 days:</p>
+
+<div style="background-color: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 5px; border: 1px solid #dee2e6;">
+    <form method="POST" action="/update_availability">
+        <h3>Available Days (Next 7 Days)</h3>
+        <p style="color: #6c757d; margin-bottom: 20px;">Check the boxes for the days you will be available:</p>
+        
+        <!-- Generate next 7 days dynamically with JavaScript -->
+        {% set current_dates = seller.open_dates %}
+        {% set selected_dates = current_dates|from_json if current_dates else [] %}
+        
+        <div id="days-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+            <!-- Days will be populated by JavaScript -->
+        </div>
+        
+        <div style="margin-top: 30px; display: flex; gap: 15px;">
+            <button type="submit" 
+                    style="padding: 12px 25px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+                Save Availability
+            </button>
+            
+            <a href="/seller_dashboard" 
+               style="padding: 12px 25px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; font-size: 16px;">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Current Availability Display -->
+{% if current_dates %}
+<div style="background-color: #d1ecf1; padding: 20px; margin: 20px 0; border-radius: 5px; border: 1px solid #bee5eb;">
+    <h4>Current Availability</h4>
+    {% set dates_list = current_dates|from_json %}
+    <ul style="margin: 10px 0;">
+        {% for date in dates_list %}
+        <li style="margin: 5px 0;" id="current-date-{{ loop.index0 }}">
+            {{ date }}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const container = document.getElementById('days-container');
+    const selectedDates = {{ selected_dates|tojson }};
+    
+    // Generate next 7 days
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() + i);
+        
+        const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+        const displayDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        const isSelected = selectedDates.includes(dateStr);
+        
+        const dayDiv = document.createElement('div');
+        dayDiv.style.padding = '15px';
+        dayDiv.style.border = '1px solid #dee2e6';
+        dayDiv.style.borderRadius = '5px';
+        dayDiv.style.backgroundColor = 'white';
+        
+        dayDiv.innerHTML = `
+            <label style="display: flex; align-items: center; cursor: pointer;">
+                <input type="checkbox" name="available_dates" value="${dateStr}" 
+                       ${isSelected ? 'checked' : ''}
+                       style="margin-right: 10px; transform: scale(1.2);">
+                <div>
+                    <div style="font-weight: bold; color: #495057;">${dayName}</div>
+                    <div style="font-size: 14px; color: #6c757d;">${displayDate}</div>
+                </div>
+            </label>
+        `;
+        
+        container.appendChild(dayDiv);
+    }
+    
+    // Format current availability dates
+    {% if current_dates %}
+        {% for date in dates_list %}
+        const currentDateElement = document.getElementById('current-date-{{ loop.index0 }}');
+        if (currentDateElement) {
+            const dateObj = new Date('{{ date }}');
+            const formattedDate = dateObj.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            currentDateElement.textContent = '{{ date }} - ' + formattedDate;
+        }
+        {% endfor %}
+    {% endif %}
+});
+</script>
+
+{% endblock %}

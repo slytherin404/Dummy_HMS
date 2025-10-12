@@ -25,6 +25,8 @@ class Seller(db.Model):
     role = db.Column(db.String(20), default="seller", nullable=False)
     # NEW: status field -> active / blocked / deleted
     status = db.Column(db.String(20), default="active", nullable=False)
+    # Available days - JSON string storing list of dates when seller is available
+    open_dates = db.Column(db.Text, nullable=True)
 
     # Link to Admin
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=True)

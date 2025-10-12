@@ -71,14 +71,39 @@ Task to mentees --> 7th Oct 2025
 56. Once done, commit all the changes done till now.
 57. After cross reviewing your task with me, then only you will push your codes on github repository.
 
-Task to mentees --> 10th Oct 2025
+Task to mentees --> 11th Oct 2025
 
 58. Search functionality is done using SQLAlchemy filter function --> search route made, done by admin, to search doctors and patients by name.
 59. Search route mentioned inside admin_dashboard.html page as well.
-60. Show all the departments created by admin --> inside Patient dashboard using jinja2.
+60. Show all the departments created by admin --> inside Patient dashboard using jinja2 --> with button to view doctors inside that department.
 61. Each department should have a button --> to view all the doctors present in that department --> inside Patient dashboard.
 62. Create a route --> to show all the doctors present in that department --> inside Patient dashboard.
 63. Give the route link inside patient_dashboard.html page as well.
 64. Search bar on Patient dashboard --> to search the doctor by name.
 65. Create a route for searching the doctor by name --> shown on patient dashboard..
-66. Doctor table should have a column of "Available" and "Not Available" --> to show the availability status of the doctor.
+66. Doctor table should have a column of "Available" --> to show the availability status of the doctor --> inside models.py file as well.
+67. Create a route --> to update the availability status of the doctor --> done by doctor himself.
+68. Create a button on doctor dashboard --> to redirect to update availability status page.
+69. Create a HTML page --> for updating the availability status of the doctor --> done by doctor himself.
+70. Once done, commit all the changes done till now.
+71. Patient Dashboard --> when a particular department view details button clicked --> show all doctors inside that department using jinja2.
+72. On patient dashboard --> when list of doctor of particular department is shown --> create a button to show availability of that doctor.
+73. Create a route --> to show availability of that doctor --> on patient dashboard.
+74. Create a HTML page --> to show availability of that doctor --> on patient dashboard.
+75. Once done, commit all the changes done till now.
+76. when checking each doctors availability --> show all the mentioned available dates of that doctor --> give a select option, which patient can select any one date from the available dates --> and give a button book appointment to confirm and save that booking into appointment table.
+77. Create a route --> to book the appointment of that doctor on selected date --> on patient dashboard.
+78. once appointment is booked, show that appointment details on patient dashboard as well.
+79. Create a HTML page --> to show all the appointments booked by that patient --> on patient dashboard.
+80. Create a button on patient dashboard --> to cancel the booked appointement.
+81. Create a route --> to cancel the booked appointement --> on patient dashboard.
+82. Once done, commit all the changes done till now.
+83. show that booked appointment to that particular doctor --> on doctor dashboard in a table format with 2 button, completed and cancel.
+84. Create a route --> to mark that appointment as completed --> on doctor dashboard.
+85. Create a route --> to cancel that appointment --> on doctor dashboard.
+86. Once done, commit all the changes done till now.
+87. show all the appointments table data on the admin dashboard as well.
+88. give a check route that whatever date of doctor is booked is not shown again in the availability of that doctor to other patients.
+89. Once done, commit all the changes done till now.
+90. On admin dashboard --> show total number of doctors, patients and appointments using SQLAlchemy count function.
+91. After cross reviewing your task with me, then only you will push your codes on github repository.
